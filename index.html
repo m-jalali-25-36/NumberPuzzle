@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بازی پازل اعداد</title>
+
+    <style>
+        *{
+            text-align: center;
+        }
+        #content {
+            width: 70%;
+            margin: 100px auto;
+            background-color: #9DB2BF;
+            border: 2px solid #27374D;
+            border-radius: 7px;
+            box-shadow: 0 0 5px 5px #526D82;
+        }
+
+        #board_game {
+            width: auto;
+            margin: 20px auto;
+            display: table;
+            position: relative;
+        }
+
+        #blind {
+            position: absolute;
+            width: 104%;
+            height: 104%;
+            left: -2%;
+            top: -2%;
+            background-color: rgb(0 0 0 / 65%);
+            /* display: none; */
+        }
+
+        #blind span {
+            margin: 38% 27%;
+            display: block;
+            background-color: darkorange;
+            border-radius: 5px;
+            width: 40%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #board_game table button {
+            width: 75px;
+            height: 75px;
+            font-size: 30px;
+            border: 2px solid #526D82;
+            border-radius: 5px;
+        }
+    </style>
+
+    <script>
+        var boardGame = null;
+        var boardSizeRow = 3;
+        var boardSizeColumn = 3;
+        var boardSize = boardSizeColumn * boardSizeRow;
+        function btnClick(btn, index) {
+            let emptyBlock = -1;
+            if (Math.ceil((index - 1) / boardSizeColumn) == Math.ceil(index / boardSizeColumn) && boardGame[index - 1 - 1] == 0) { emptyBlock = index - 1 - 1; }
+            else if (Math.ceil((index + 1) / boardSizeColumn) == Math.ceil(index / boardSizeColumn) && boardGame[index + 1 - 1] == 0) { emptyBlock = index + 1 - 1; }
+            else if (index - boardSizeColumn > 0 && boardGame[index - boardSizeColumn - 1] == 0) { emptyBlock = index - boardSizeColumn - 1; }
+            else if (index + boardSizeColumn <= boardSize && boardGame[index + boardSizeColumn - 1] == 0) { emptyBlock = index + boardSizeColumn - 1; }
+            if (emptyBlock != -1) {
+                boardGame[emptyBlock] = boardGame[index - 1];
+                boardGame[index - 1] = 0;
+                document.getElementById("btn" + index).innerHTML = "";
+                document.getElementById("btn" + (emptyBlock + 1)).innerHTML = boardGame[emptyBlock];
+            }
+            if (checkEndGeme()) {
+                document.getElementById("message").innerHTML = "پایان بازی";
+                document.getElementById("blind").style.display = "block";
+            }
+        }
+        function StartGame() {
+            document.getElementById("blind").style.display = "none";
+            boardGame = new Array(boardSize);
+            for (let i = 0; i < boardGame.length; i++) {
+                boardGame[i] = i + 1;
+            }
+
+            let emptyBlock = 8;
+            let tabo = new Array(3);
+            for (let i = 0; i < 100; i++) {
+                let movements = GetMovements(emptyBlock);
+                let ran, ok, MAXWHILE = 10, iw = 0;
+                do {
+                    ran = Math.floor(Math.random() * (movements.length));
+                    ok = true;
+                    for (let j = 0; j < tabo.length; j++) {
+                        if (movements[ran] == tabo[j]) {
+                            ok = false;
+                            break;
+                        }
+                    }
+                    iw++;
+                } while (!ok && iw <= MAXWHILE);
+                tabo[i % tabo.length] = emptyBlock;
+                let indexMove = movements[ran];
+                boardGame[emptyBlock] = boardGame[indexMove];
+                boardGame[indexMove] = 0;
+                emptyBlock = indexMove;
+            }
+
+            for (let i = 0; i < boardGame.length; i++) {
+                if (boardGame[i] == 0)
+                    document.getElementById("btn" + (i + 1)).innerHTML = "";
+                else
+                    document.getElementById("btn" + (i + 1)).innerHTML = boardGame[i];
+            }
+
+        }
+        function checkEndGeme() {
+            for (let i = 0; i < boardGame.length - 1; i++) {
+                if (boardGame[i] != i + 1)
+                    return false;
+            }
+            return true;
+        }
+        function GetMovements(index) {
+            let i = 0;
+            let Movements = new Array();
+            if (Math.ceil((index - 1) / boardSizeColumn) == Math.ceil(index / boardSizeColumn) && index - 1 >= 0) { Movements[i] = index - 1; i++; }
+            if (Math.ceil((index + 1) / boardSizeColumn) == Math.ceil(index / boardSizeColumn) && index + 1 < boardSize) { Movements[i] = index + 1; i++; }
+            if (index - boardSizeColumn >= 0) { Movements[i] = index - boardSizeColumn; i++; }
+            if (index + boardSizeColumn < boardSize) { Movements[i] = index + boardSizeColumn; i++; }
+            return Movements;
+        }
+    </script>
+</head>
+
+<body>
+    <div id="content">
+        <h1>بازی پازل اعداد</h1>
+        <p>یک خانه را انتخاب کنید تا با خانه ی خالی جا به جا شود. بازی زمانی تمام میشود که اعدا از چپ به راست به ترتیب قرار گیرند.</p>
+        <div id="board_game">
+            <div id="blind"><span><div id="message"></div><button id="btnStartGame" onclick="StartGame();">شروع بازی</button></span></div>
+            <table>
+                <tr>
+                    <td><button id="btn1" onclick="btnClick(this, 1);"></button></td>
+                    <td><button id="btn2" onclick="btnClick(this, 2);"></button></td>
+                    <td><button id="btn3" onclick="btnClick(this, 3);"></button></td>
+                </tr>
+                <tr>
+                    <td><button id="btn4" onclick="btnClick(this, 4);"></button></td>
+                    <td><button id="btn5" onclick="btnClick(this, 5);"></button></td>
+                    <td><button id="btn6" onclick="btnClick(this, 6);"></button></td>
+                </tr>
+                <tr>
+                    <td><button id="btn7" onclick="btnClick(this, 7);"></button></td>
+                    <td><button id="btn8" onclick="btnClick(this, 8);"></button></td>
+                    <td><button id="btn9" onclick="btnClick(this, 9);"></button></td>
+                </tr>
+            </table>
+        </div>
+        <p>کاری از محمد جلالی</p>
+    </div>
+</body>
+
+</html>
